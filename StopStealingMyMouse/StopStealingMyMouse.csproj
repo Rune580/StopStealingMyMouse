@@ -24,7 +24,7 @@
     
     <ItemGroup>
         <OutputFiles Include="$(TargetPath);$(TargetDir)$(TargetName).pdb" InProject="false" />
-        <PackageFiles Include="manifest.json;icon.png;README.md" />
+        <PackageFiles Include="../manifest.json;../icon.png;../README.md" />
         <ThunderstoreDirs Include="$(OutputPath)\thunderstore\;$(OutputPath)\thunderstore\package;$(OutputPath)\thunderstore\package\StopStealingMyMouse\" InProject="false" />
     </ItemGroup>
 
