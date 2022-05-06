@@ -1,0 +1,10 @@
+{
+  "name": "StopStealingMyMouse",
+  "version_number": "1.0.0",
+  "website_url": "",
+  "description": "This is a description for a mod. 250 characters max",
+  "dependencies": [
+    "bbepis-BepInExPack-5.4.1903",
+    "RiskofThunder-HookGenPatcher-1.2.3"
+  ]
+}
