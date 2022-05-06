@@ -24,11 +24,22 @@
     
     <ItemGroup>
         <OutputFiles Include="$(TargetPath);$(TargetDir)$(TargetName).pdb" InProject="false" />
+        <PackageFiles Include="manifest.json;icon.png;README.md" />
+        <ThunderstoreDirs Include="$(OutputPath)\thunderstore\;$(OutputPath)\thunderstore\package;$(OutputPath)\thunderstore\package\StopStealingMyMouse\" InProject="false" />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
         <!-- Copies dll and pdb to plugins folder -->
         <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(RoR2Dir)\BepInEx\plugins" />
+    </Target>
+
+    <Target Name="Thunderstore" Condition="'$(Configuration)' == 'Release'" AfterTargets="PostBuild">
+        <!-- Packages build into a zip that's ready to upload -->
+        <MakeDir Directories="@(ThunderstoreDirs)" />
+        <Copy SourceFiles="@(PackageFiles)" DestinationFolder="$(OutputPath)\thunderstore\package\" />
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(OutputPath)\thunderstore\package\StopStealingMyMouse\" />
+        <Delete Condition="Exists('$(OutputPath)\thunderstore\StopStealingMyMouse-Output.zip')" Files="$(OutputPath)\thunderstore\StopStealingMyMouse-Output.zip" />
+        <ZipDirectory SourceDirectory="$(OutputPath)\thunderstore\package\" DestinationFile="$(OutputPath)\thunderstore\StopStealingMyMouse-Output.zip" />
     </Target>
 
 </Project>
