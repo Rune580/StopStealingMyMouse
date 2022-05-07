@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Reflection;
 using System.Security;
 using System.Security.Permissions;
 using BepInEx;
 using RoR2;
 using UnityEngine;
-using Monomod.RuntimeDetour;
+using MonoMod.RuntimeDetour;
+using RoR2.UI;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -25,26 +25,34 @@ namespace StopStealingMyMouse
             Version = "1.1.0";
         
         private bool _arrestRoR2 = true;
-        private Hook hook;
-        
+        private Hook _mpEventSystemManagerHook;
+        private Hook _hgButtonHook;
+
         private void Awake()
         {
-            var targetMethod = typeof(RoR2.MPEventSystemManager).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
-            var overridingMethod = GetType().GetMethod(nameof(MPEventSystemManagerOnUpdate), BindingFlags.NonPublic | BindingFlags.Instance);
-            hook = new Hook(targetMethod, overridingMethod);
-            
-            HGButton.OnClickCustom += HGButtonOnOnClickCustom;
+            ArrestRoR2();
         }
 
-        private void HGButtonOnOnClickCustom(HGButton.orig_OnClickCustom orig, RoR2.UI.HGButton self)
+        private void ArrestRoR2()
         {
-            if (_arrestRoR2)
-                _arrestRoR2 = false;
+            var targetMethod = typeof(MPEventSystemManager).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+            var overridingMethod = GetType().GetMethod(nameof(MPEventSystemManagerOnUpdate), BindingFlags.NonPublic | BindingFlags.Instance);
 
-            orig(self);
+            _mpEventSystemManagerHook = new Hook(targetMethod, overridingMethod, this);
+
+            targetMethod = typeof(HGButton).GetMethod("OnClickCustom", BindingFlags.Public | BindingFlags.Instance);
+            overridingMethod = GetType().GetMethod(nameof(HGButtonOnOnClickCustom), BindingFlags.NonPublic | BindingFlags.Instance);
+
+            _hgButtonHook = new Hook(targetMethod, overridingMethod, this);
         }
 
-        private void MPEventSystemManagerOnUpdate(MPEventSystemManager.orig_Update orig, RoR2.MPEventSystemManager self)
+        private void ReleaseRoR2()
+        {
+            _mpEventSystemManagerHook.Undo();
+            _hgButtonHook.Undo();
+        }
+
+        private void MPEventSystemManagerOnUpdate(Action<MPEventSystemManager> orig, MPEventSystemManager self)
         {
             if (_arrestRoR2)
             {
@@ -53,6 +61,14 @@ namespace StopStealingMyMouse
                 return;
             }
             
+            orig(self);
+        }
+        
+        private void HGButtonOnOnClickCustom(Action<HGButton> orig, HGButton self)
+        {
+            if (_arrestRoR2)
+                ReleaseRoR2();
+
             orig(self);
         }
 
