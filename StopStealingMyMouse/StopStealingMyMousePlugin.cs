@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Reflection;
 using System.Security;
 using System.Security.Permissions;
 using BepInEx;
-using On.RoR2.UI;
 using RoR2;
 using UnityEngine;
-using MPEventSystemManager = On.RoR2.MPEventSystemManager;
+using Monomod.RuntimeDetour;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
@@ -25,10 +25,14 @@ namespace StopStealingMyMouse
             Version = "1.1.0";
         
         private bool _arrestRoR2 = true;
+        private Hook hook;
         
         private void Awake()
         {
-            MPEventSystemManager.Update += MPEventSystemManagerOnUpdate;
+            var targetMethod = typeof(RoR2.MPEventSystemManager).GetMethod("Update", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+            var overridingMethod = GetType().GetMethod(nameof(MPEventSystemManagerOnUpdate), BindingFlags.NonPublic | BindingFlags.Instance);
+            hook = new Hook(targetMethod, overridingMethod);
+            
             HGButton.OnClickCustom += HGButtonOnOnClickCustom;
         }
 
