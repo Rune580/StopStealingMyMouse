@@ -1,6 +1,6 @@
 {
   "name": "StopStealingMyMouse",
-  "version_number": "1.1.0",
+  "version_number": "1.2.0",
   "website_url": "https://github.com/Rune580/StopStealingMyMouse",
   "description": "Stops RoR2 from stealing your mouse during load.",
   "dependencies": [

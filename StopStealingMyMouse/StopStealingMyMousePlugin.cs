@@ -22,7 +22,7 @@ namespace StopStealingMyMouse
             ModName = "Stop stealing my mouse!",
             Author = "rune580",
             Guid = "com." + Author + "." + "stopstealingmymouse",
-            Version = "1.1.0";
+            Version = "1.2.0";
         
         private bool _arrestRoR2 = true;
         private Hook _mpEventSystemManagerHook;
