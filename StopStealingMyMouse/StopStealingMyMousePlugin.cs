@@ -1,6 +1,9 @@
-﻿using System.Security;
+﻿using System;
+using System.Runtime.InteropServices;
+using System.Security;
 using System.Security.Permissions;
 using BepInEx;
+using On.RoR2.UI;
 using RoR2;
 using UnityEngine;
 using MPEventSystemManager = On.RoR2.MPEventSystemManager;
@@ -19,23 +22,44 @@ namespace StopStealingMyMouse
             ModName = "Stop stealing my mouse!",
             Author = "rune580",
             Guid = "com." + Author + "." + "stopstealingmymouse",
-            Version = "1.0.0";
+            Version = "1.1.0";
+        
+        private bool _arrestRoR2 = true;
         
         private void Awake()
         {
             MPEventSystemManager.Update += MPEventSystemManagerOnUpdate;
+            HGButton.OnClickCustom += HGButtonOnOnClickCustom;
+        }
+
+        private void HGButtonOnOnClickCustom(HGButton.orig_OnClickCustom orig, RoR2.UI.HGButton self)
+        {
+            if (_arrestRoR2)
+                _arrestRoR2 = false;
+
+            orig(self);
         }
 
         private void MPEventSystemManagerOnUpdate(MPEventSystemManager.orig_Update orig, RoR2.MPEventSystemManager self)
         {
-            if (!RoR2Application.loadFinished)
+            if (_arrestRoR2)
             {
                 Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
+                Cursor.visible = false;
                 return;
             }
             
             orig(self);
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (_arrestRoR2 && RoR2Application.loadFinished && hasFocus)
+            {
+                _arrestRoR2 = false;
+                Cursor.lockState = CursorLockMode.Confined;
+                Cursor.visible = false;
+            }
         }
     }
 }
